@@ -1,3 +1,4 @@
+// TODO why are these function
 function makeArticlesArray() {
   return [
     {

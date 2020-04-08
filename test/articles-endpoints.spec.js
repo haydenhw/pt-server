@@ -21,14 +21,14 @@ describe('Articles Endpoints', function() {
 
   describe(`GET /api/articles`, () => {
     context(`Given no articles`, () => {
-      it(`responds with 200 and an empty list`, () => {
+      it(` responds with 200 and an empty list`, () => {
         return supertest(app)
-          .get('/api/articles')
+          .get('/api/projects')
           .expect(200, [])
       })
     })
 
-    context('Given there are articles in the database', () => {
+    context('jjGiven there are articles in the database', () => {
       const testArticles = makeArticlesArray()
 
       beforeEach('insert articles', () => {
