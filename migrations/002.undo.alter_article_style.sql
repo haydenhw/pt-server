@@ -1,3 +1,3 @@
-ALTER TABLE blogful_articles DROP COLUMN IF EXISTS style;
+ALTER TABLE projects DROP COLUMN IF EXISTS style;
 
-DROP TYPE IF EXISTS article_category;
+DROP TYPE IF EXISTS project_category;

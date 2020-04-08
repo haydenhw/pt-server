@@ -1,77 +1,77 @@
 const path = require('path')
 const express = require('express')
 const xss = require('xss')
-const ArticlesService = require('./articles-service')
+const ProjectsService = require('./projects-service')
 
-const articlesRouter = express.Router()
+const projectsRouter = express.Router()
 const jsonParser = express.json()
 
-const serializeArticle = article => ({
-  id: article.id,
-  style: article.style,
-  title: xss(article.title),
-  content: xss(article.content),
-  date_published: article.date_published,
+const serializeProject = project => ({
+  id: project.id,
+  style: project.style,
+  title: xss(project.title),
+  content: xss(project.content),
+  date_published: project.date_published,
 })
 
-articlesRouter
+projectsRouter
   .route('/')
   .get((req, res, next) => {
     const knexInstance = req.app.get('db')
-    ArticlesService.getAllArticles(knexInstance)
-      .then(articles => {
-        res.json(articles.map(serializeArticle))
+    ProjectsService.getAllProjects(knexInstance)
+      .then(projects => {
+        res.json(projects.map(serializeProject))
       })
       .catch(next)
   })
   .post(jsonParser, (req, res, next) => {
     const { title, content, style } = req.body
-    const newArticle = { title, content, style }
+    const newProject = { title, content, style }
 
-    for (const [key, value] of Object.entries(newArticle))
+    for (const [key, value] of Object.entries(newProject))
       if (value == null)
         return res.status(400).json({
           error: { message: `Missing '${key}' in request body` }
         })
 
-    ArticlesService.insertArticle(
+    ProjectsService.insertProject(
       req.app.get('db'),
-      newArticle
+      newProject
     )
-      .then(article => {
+      .then(project => {
         res
           .status(201)
-          .location(path.posix.join(req.originalUrl, `/${article.id}`))
-          .json(serializeArticle(article))
+          .location(path.posix.join(req.originalUrl, `/${project.id}`))
+          .json(serializeProject(project))
       })
       .catch(next)
   })
 
-articlesRouter
-  .route('/:article_id')
+projectsRouter
+  .route('/:project_id')
   .all((req, res, next) => {
-    ArticlesService.getById(
+    ProjectsService.getById(
       req.app.get('db'),
-      req.params.article_id
+      req.params.project_id
     )
-      .then(article => {
-        if (!article) {
+      .then(project => {
+        if (!project) {
           return res.status(404).json({
-            error: { message: `Article doesn't exist` }
+            error: { message: `Project doesn't exist` }
           })
         }
-        res.article = article
+        res.project = project
         next()
       })
       .catch(next)
   })
   .get((req, res, next) => {
-    res.json(serializeArticle(res.article))
+    res.json(serializeProject(res.project))
   })
   .delete((req, res, next) => {
-    ArticlesService.deleteArticle(
+    ProjectsService.deleteProject(
       req.app.get('db'),
-      req.params.article_id
+      req.params.project_id
     )
       .then(numRowsAffected => {
         res.status(204).end()
@@ -80,9 +80,9 @@ articlesRouter
   })
   .patch(jsonParser, (req, res, next) => {
     const { title, content, style } = req.body
-    const articleToUpdate = { title, content, style }
+    const projectToUpdate = { title, content, style }
 
-    const numberOfValues = Object.values(articleToUpdate).filter(Boolean).length
+    const numberOfValues = Object.values(projectToUpdate).filter(Boolean).length
     if (numberOfValues === 0)
       return res.status(400).json({
         error: {
@@ -90,10 +90,10 @@ articlesRouter
         }
       })
 
-    ArticlesService.updateArticle(
+    ProjectsService.updateProject(
       req.app.get('db'),
-      req.params.article_id,
-      articleToUpdate
+      req.params.project_id,
+      projectToUpdate
     )
       .then(numRowsAffected => {
         res.status(204).end()
@@ -101,4 +101,4 @@ articlesRouter
       .catch(next)
   })
 
-module.exports = articlesRouter
+module.exports = projectsRouter

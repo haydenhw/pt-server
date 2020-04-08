@@ -1,8 +1,8 @@
 const knex = require('knex')
 const app = require('../src/app')
-const { makeArticlesArray, makeMaliciousArticle } = require('./articles.fixtures')
+const { makeProjectsArray, makeMaliciousProject } = require('./projects.fixtures')
 
-describe('Articles Endpoints', function() {
+describe('Projects Endpoints', function() {
   let db
 
   before('make knex instance', () => {
@@ -15,12 +15,12 @@ describe('Articles Endpoints', function() {
 
   after('disconnect from db', () => db.destroy())
 
-  before('clean the table', () => db('blogful_articles').truncate())
+  before('clean the table', () => db('projects').truncate())
 
-  afterEach('cleanup',() => db('blogful_articles').truncate())
+  afterEach('cleanup',() => db('projects').truncate())
 
-  describe(`GET /api/articles`, () => {
-    context(`Given no articles`, () => {
+  describe(`GET /api/projects`, () => {
+    context(`Given no projects`, () => {
       it(` responds with 200 and an empty list`, () => {
         return supertest(app)
           .get('/api/projects')
@@ -28,116 +28,116 @@ describe('Articles Endpoints', function() {
       })
     })
 
-    context('jjGiven there are articles in the database', () => {
-      const testArticles = makeArticlesArray()
+    context('jjGiven there are projects in the database', () => {
+      const testProjects = makeProjectsArray()
 
-      beforeEach('insert articles', () => {
+      beforeEach('insert projects', () => {
         return db
-          .into('blogful_articles')
-          .insert(testArticles)
+          .into('projects')
+          .insert(testProjects)
       })
 
-      it('responds with 200 and all of the articles', () => {
+      it('responds with 200 and all of the projects', () => {
         return supertest(app)
-          .get('/api/articles')
-          .expect(200, testArticles)
+          .get('/api/projects')
+          .expect(200, testProjects)
       })
     })
 
-    context(`Given an XSS attack article`, () => {
-      const { maliciousArticle, expectedArticle } = makeMaliciousArticle()
+    context(`Given an XSS attack project`, () => {
+      const { maliciousProject, expectedProject } = makeMaliciousProject()
 
-      beforeEach('insert malicious article', () => {
+      beforeEach('insert malicious project', () => {
         return db
-          .into('blogful_articles')
-          .insert([ maliciousArticle ])
+          .into('projects')
+          .insert([ maliciousProject ])
       })
 
       it('removes XSS attack content', () => {
         return supertest(app)
-          .get(`/api/articles`)
+          .get(`/api/projects`)
           .expect(200)
           .expect(res => {
-            expect(res.body[0].title).to.eql(expectedArticle.title)
-            expect(res.body[0].content).to.eql(expectedArticle.content)
+            expect(res.body[0].title).to.eql(expectedProject.title)
+            expect(res.body[0].content).to.eql(expectedProject.content)
           })
       })
     })
   })
 
-  describe(`GET /api/articles/:article_id`, () => {
-    context(`Given no articles`, () => {
+  describe(`GET /api/projects/:project_id`, () => {
+    context(`Given no projects`, () => {
       it(`responds with 404`, () => {
-        const articleId = 123456
+        const projectId = 123456
         return supertest(app)
-          .get(`/api/articles/${articleId}`)
-          .expect(404, { error: { message: `Article doesn't exist` } })
+          .get(`/api/projects/${projectId}`)
+          .expect(404, { error: { message: `Project doesn't exist` } })
       })
     })
 
-    context('Given there are articles in the database', () => {
-      const testArticles = makeArticlesArray()
+    context('Given there are projects in the database', () => {
+      const testProjects = makeProjectsArray()
 
-      beforeEach('insert articles', () => {
+      beforeEach('insert projects', () => {
         return db
-          .into('blogful_articles')
-          .insert(testArticles)
+          .into('projects')
+          .insert(testProjects)
       })
 
-      it('responds with 200 and the specified article', () => {
-        const articleId = 2
-        const expectedArticle = testArticles[articleId - 1]
+      it('responds with 200 and the specified project', () => {
+        const projectId = 2
+        const expectedProject = testProjects[projectId - 1]
         return supertest(app)
-          .get(`/api/articles/${articleId}`)
-          .expect(200, expectedArticle)
+          .get(`/api/projects/${projectId}`)
+          .expect(200, expectedProject)
       })
     })
 
-    context(`Given an XSS attack article`, () => {
-      const { maliciousArticle, expectedArticle } = makeMaliciousArticle()
+    context(`Given an XSS attack project`, () => {
+      const { maliciousProject, expectedProject } = makeMaliciousProject()
 
-      beforeEach('insert malicious article', () => {
+      beforeEach('insert malicious project', () => {
         return db
-          .into('blogful_articles')
-          .insert([ maliciousArticle ])
+          .into('projects')
+          .insert([ maliciousProject ])
       })
 
       it('removes XSS attack content', () => {
         return supertest(app)
-          .get(`/api/articles/${maliciousArticle.id}`)
+          .get(`/api/projects/${maliciousProject.id}`)
           .expect(200)
           .expect(res => {
-            expect(res.body.title).to.eql(expectedArticle.title)
-            expect(res.body.content).to.eql(expectedArticle.content)
+            expect(res.body.title).to.eql(expectedProject.title)
+            expect(res.body.content).to.eql(expectedProject.content)
           })
       })
     })
   })
 
-  describe(`POST /api/articles`, () => {
-    it(`creates an article, responding with 201 and the new article`, () => {
-      const newArticle = {
-        title: 'Test new article',
+  describe(`POST /api/projects`, () => {
+    it(`creates a project, responding with 201 and the new project`, () => {
+      const newProject = {
+        title: 'Test new project',
         style: 'Listicle',
-        content: 'Test new article content...'
+        content: 'Test new project content...'
       }
       return supertest(app)
-        .post('/api/articles')
-        .send(newArticle)
+        .post('/api/projects')
+        .send(newProject)
         .expect(201)
         .expect(res => {
-          expect(res.body.title).to.eql(newArticle.title)
-          expect(res.body.style).to.eql(newArticle.style)
-          expect(res.body.content).to.eql(newArticle.content)
+          expect(res.body.title).to.eql(newProject.title)
+          expect(res.body.style).to.eql(newProject.style)
+          expect(res.body.content).to.eql(newProject.content)
           expect(res.body).to.have.property('id')
-          expect(res.headers.location).to.eql(`/api/articles/${res.body.id}`)
+          expect(res.headers.location).to.eql(`/api/projects/${res.body.id}`)
           const expected = new Date().toLocaleString()
           const actual = new Date(res.body.date_published).toLocaleString()
           expect(actual).to.eql(expected)
         })
         .then(res =>
           supertest(app)
-            .get(`/api/articles/${res.body.id}`)
+            .get(`/api/projects/${res.body.id}`)
             .expect(res.body)
         )
     })
@@ -145,18 +145,18 @@ describe('Articles Endpoints', function() {
     const requiredFields = ['title', 'style', 'content']
 
     requiredFields.forEach(field => {
-      const newArticle = {
-        title: 'Test new article',
+      const newProject = {
+        title: 'Test new project',
         style: 'Listicle',
-        content: 'Test new article content...'
+        content: 'Test new project content...'
       }
 
       it(`responds with 400 and an error message when the '${field}' is missing`, () => {
-        delete newArticle[field]
+        delete newProject[field]
 
         return supertest(app)
-          .post('/api/articles')
-          .send(newArticle)
+          .post('/api/projects')
+          .send(newProject)
           .expect(400, {
             error: { message: `Missing '${field}' in request body` }
           })
@@ -164,97 +164,97 @@ describe('Articles Endpoints', function() {
     })
 
     it('removes XSS attack content from response', () => {
-      const { maliciousArticle, expectedArticle } = makeMaliciousArticle()
+      const { maliciousProject, expectedProject } = makeMaliciousProject()
       return supertest(app)
-        .post(`/api/articles`)
-        .send(maliciousArticle)
+        .post(`/api/projects`)
+        .send(maliciousProject)
         .expect(201)
         .expect(res => {
-          expect(res.body.title).to.eql(expectedArticle.title)
-          expect(res.body.content).to.eql(expectedArticle.content)
+          expect(res.body.title).to.eql(expectedProject.title)
+          expect(res.body.content).to.eql(expectedProject.content)
         })
     })
   })
 
-  describe(`DELETE /api/articles/:article_id`, () => {
-    context(`Given no articles`, () => {
+  describe(`DELETE /api/projects/:project_id`, () => {
+    context(`Given no projects`, () => {
       it(`responds with 404`, () => {
-        const articleId = 123456
+        const projectId = 123456
         return supertest(app)
-          .delete(`/api/articles/${articleId}`)
-          .expect(404, { error: { message: `Article doesn't exist` } })
+          .delete(`/api/projects/${projectId}`)
+          .expect(404, { error: { message: `Project doesn't exist` } })
       })
     })
 
-    context('Given there are articles in the database', () => {
-      const testArticles = makeArticlesArray()
+    context('Given there are projects in the database', () => {
+      const testProjects = makeProjectsArray()
 
-      beforeEach('insert articles', () => {
+      beforeEach('insert projects', () => {
         return db
-          .into('blogful_articles')
-          .insert(testArticles)
+          .into('projects')
+          .insert(testProjects)
       })
 
-      it('responds with 204 and removes the article', () => {
+      it('responds with 204 and removes the project', () => {
         const idToRemove = 2
-        const expectedArticles = testArticles.filter(article => article.id !== idToRemove)
+        const expectedProjects = testProjects.filter(project => project.id !== idToRemove)
         return supertest(app)
-          .delete(`/api/articles/${idToRemove}`)
+          .delete(`/api/projects/${idToRemove}`)
           .expect(204)
           .then(res =>
             supertest(app)
-              .get(`/api/articles`)
-              .expect(expectedArticles)
+              .get(`/api/projects`)
+              .expect(expectedProjects)
           )
       })
     })
   })
 
-  describe(`PATCH /api/articles/:article_id`, () => {
-    context(`Given no articles`, () => {
+  describe(`PATCH /api/projects/:project_id`, () => {
+    context(`Given no projects`, () => {
       it(`responds with 404`, () => {
-        const articleId = 123456
+        const projectId = 123456
         return supertest(app)
-          .delete(`/api/articles/${articleId}`)
-          .expect(404, { error: { message: `Article doesn't exist` } })
+          .delete(`/api/projects/${projectId}`)
+          .expect(404, { error: { message: `Project doesn't exist` } })
       })
     })
 
-    context('Given there are articles in the database', () => {
-      const testArticles = makeArticlesArray()
+    context('Given there are projects in the database', () => {
+      const testProjects = makeProjectsArray()
 
-      beforeEach('insert articles', () => {
+      beforeEach('insert projects', () => {
         return db
-          .into('blogful_articles')
-          .insert(testArticles)
+          .into('projects')
+          .insert(testProjects)
       })
 
-      it('responds with 204 and updates the article', () => {
+      it('responds with 204 and updates the project', () => {
         const idToUpdate = 2
-        const updateArticle = {
-          title: 'updated article title',
+        const updateProject = {
+          title: 'updated project title',
           style: 'Interview',
-          content: 'updated article content',
+          content: 'updated project content',
         }
-        const expectedArticle = {
-          ...testArticles[idToUpdate - 1],
-          ...updateArticle
+        const expectedProject = {
+          ...testProjects[idToUpdate - 1],
+          ...updateProject
         }
         return supertest(app)
-          .patch(`/api/articles/${idToUpdate}`)
-          .send(updateArticle)
+          .patch(`/api/projects/${idToUpdate}`)
+          .send(updateProject)
           .expect(204)
           .then(res =>
             supertest(app)
-              .get(`/api/articles/${idToUpdate}`)
-              .expect(expectedArticle)
+              .get(`/api/projects/${idToUpdate}`)
+              .expect(expectedProject)
           )
       })
 
       it(`responds with 400 when no required fields supplied`, () => {
         const idToUpdate = 2
         return supertest(app)
-          .patch(`/api/articles/${idToUpdate}`)
+          .patch(`/api/projects/${idToUpdate}`)
           .send({ irrelevantField: 'foo' })
           .expect(400, {
             error: {
@@ -265,25 +265,25 @@ describe('Articles Endpoints', function() {
 
       it(`responds with 204 when updating only a subset of fields`, () => {
         const idToUpdate = 2
-        const updateArticle = {
-          title: 'updated article title',
+        const updateProject = {
+          title: 'updated project title',
         }
-        const expectedArticle = {
-          ...testArticles[idToUpdate - 1],
-          ...updateArticle
+        const expectedProject = {
+          ...testProjects[idToUpdate - 1],
+          ...updateProject
         }
 
         return supertest(app)
-          .patch(`/api/articles/${idToUpdate}`)
+          .patch(`/api/projects/${idToUpdate}`)
           .send({
-            ...updateArticle,
+            ...updateProject,
             fieldToIgnore: 'should not be in GET response'
           })
           .expect(204)
           .then(res =>
             supertest(app)
-              .get(`/api/articles/${idToUpdate}`)
-              .expect(expectedArticle)
+              .get(`/api/projects/${idToUpdate}`)
+              .expect(expectedProject)
           )
       })
     })

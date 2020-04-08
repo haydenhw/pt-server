@@ -1,1 +1,1 @@
-TRUNCATE blogful_articles;
+TRUNCATE projects;
