@@ -25,8 +25,8 @@ projectsRouter
       .catch(next)
   })
   .post(jsonParser, (req, res, next) => {
-    const { title, content, style } = req.body
-    const newProject = { title, content, style }
+    const { project_name, client_id, user_id } = req.body
+    const newProject = { project_name, client_id, user_id  }
 
     for (const [key, value] of Object.entries(newProject))
       if (value == null)
@@ -79,14 +79,14 @@ projectsRouter
       .catch(next)
   })
   .patch(jsonParser, (req, res, next) => {
-    const { title, content, style } = req.body
-    const projectToUpdate = { title, content, style }
+    const { project_name, client_id } = req.body
+    const projectToUpdate = { project_name, client_id }
 
     const numberOfValues = Object.values(projectToUpdate).filter(Boolean).length
     if (numberOfValues === 0)
       return res.status(400).json({
         error: {
-          message: `Request body must content either 'title', 'style' or 'content'`
+          message: `Request body must contain either 'project_name' or 'client_id'`
         }
       })
 
