@@ -8,10 +8,10 @@ const jsonParser = express.json()
 
 const serializeProject = project => ({
   id: project.id,
-  style: project.style,
-  title: xss(project.title),
-  content: xss(project.content),
-  date_published: project.date_published,
+  user_id: project.user_id,
+  client_id: project.client_id ? xss(project.client_id): null,
+  project_name: xss(project.project_name),
+  date_created: project.date_created,
 })
 
 projectsRouter

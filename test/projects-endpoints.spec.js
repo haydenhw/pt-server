@@ -28,7 +28,7 @@ describe('Projects Endpoints', function() {
       })
     })
 
-    context('jjGiven there are projects in the database', () => {
+    context('Given there are projects in the database', () => {
       const testProjects = makeProjectsArray()
 
       beforeEach('insert projects', () => {
@@ -58,7 +58,7 @@ describe('Projects Endpoints', function() {
           .get(`/api/projects`)
           .expect(200)
           .expect(res => {
-            expect(res.body[0].title).to.eql(expectedProject.title)
+            expect(res.body[0].project_name).to.eql(expectedProject.project_name)
             expect(res.body[0].content).to.eql(expectedProject.content)
           })
       })
@@ -107,7 +107,7 @@ describe('Projects Endpoints', function() {
           .get(`/api/projects/${maliciousProject.id}`)
           .expect(200)
           .expect(res => {
-            expect(res.body.title).to.eql(expectedProject.title)
+            expect(res.body.project_name).to.eql(expectedProject.project_name)
             expect(res.body.content).to.eql(expectedProject.content)
           })
       })
@@ -117,22 +117,20 @@ describe('Projects Endpoints', function() {
   describe(`POST /api/projects`, () => {
     it(`creates a project, responding with 201 and the new project`, () => {
       const newProject = {
-        title: 'Test new project',
-        style: 'Listicle',
-        content: 'Test new project content...'
+        project_name: 'Test new project',
+        client_id: 'abc',
       }
       return supertest(app)
         .post('/api/projects')
         .send(newProject)
         .expect(201)
         .expect(res => {
-          expect(res.body.title).to.eql(newProject.title)
-          expect(res.body.style).to.eql(newProject.style)
-          expect(res.body.content).to.eql(newProject.content)
+          expect(res.body.project_name).to.eql(newProject.project_name)
+          expect(res.body.client_id).to.eql(newProject.client_id)
           expect(res.body).to.have.property('id')
           expect(res.headers.location).to.eql(`/api/projects/${res.body.id}`)
           const expected = new Date().toLocaleString()
-          const actual = new Date(res.body.date_published).toLocaleString()
+          const actual = new Date(res.body.date_created).toLocaleString()
           expect(actual).to.eql(expected)
         })
         .then(res =>
@@ -142,12 +140,12 @@ describe('Projects Endpoints', function() {
         )
     })
 
-    const requiredFields = ['title', 'style', 'content']
+    const requiredFields = ['project_name', 'client_id', 'content']
 
     requiredFields.forEach(field => {
       const newProject = {
-        title: 'Test new project',
-        style: 'Listicle',
+        project_name: 'Test new project',
+        client_id: 'Listicle',
         content: 'Test new project content...'
       }
 
@@ -170,7 +168,7 @@ describe('Projects Endpoints', function() {
         .send(maliciousProject)
         .expect(201)
         .expect(res => {
-          expect(res.body.title).to.eql(expectedProject.title)
+          expect(res.body.project_name).to.eql(expectedProject.project_name)
           expect(res.body.content).to.eql(expectedProject.content)
         })
     })
@@ -232,8 +230,8 @@ describe('Projects Endpoints', function() {
       it('responds with 204 and updates the project', () => {
         const idToUpdate = 2
         const updateProject = {
-          title: 'updated project title',
-          style: 'Interview',
+          project_name: 'updated project project_name',
+          client_id: 'Interview',
           content: 'updated project content',
         }
         const expectedProject = {
@@ -258,7 +256,7 @@ describe('Projects Endpoints', function() {
           .send({ irrelevantField: 'foo' })
           .expect(400, {
             error: {
-              message: `Request body must content either 'title', 'style' or 'content'`
+              message: `Request body must content either 'project_name', 'client_id' or 'content'`
             }
           })
       })
@@ -266,7 +264,7 @@ describe('Projects Endpoints', function() {
       it(`responds with 204 when updating only a subset of fields`, () => {
         const idToUpdate = 2
         const updateProject = {
-          title: 'updated project title',
+          project_name: 'updated project project_name',
         }
         const expectedProject = {
           ...testProjects[idToUpdate - 1],

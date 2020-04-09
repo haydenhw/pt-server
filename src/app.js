@@ -1,4 +1,6 @@
-require('dotenv').config()
+const path = require('path')
+const envPath = path.resolve(__dirname) + '/.env';
+require('dotenv').config({path: envPath})
 const express = require('express')
 const morgan = require('morgan')
 const cors = require('cors')
